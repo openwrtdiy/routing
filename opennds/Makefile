@@ -6,69 +6,71 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=opennds
-PKG_FIXUP:=autoreconf
-PKG_VERSION:=5.2.0
+PKG_VERSION:=9.7.0
 PKG_RELEASE:=1
 
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/opennds/opennds/tar.gz/v$(PKG_VERSION)?
-PKG_SOURCE:=opennds-$(PKG_VERSION).tar.gz
-PKG_HASH:=8b8d8ab0b3d13f9b7c5fddb9423161e9e89c7051503ab219805209296eb00074
+PKG_HASH:=3059911743edeec7b89c289d40382696273646a632e2e7cdcb43067d0396b347
 PKG_BUILD_DIR:=$(BUILD_DIR)/openNDS-$(PKG_VERSION)
 
 PKG_MAINTAINER:=Rob White <rob@blue-wave.net>
+PKG_LICENSE:=GPL-2.0-or-later
+PKG_LICENSE_FILES:=COPYING
+
+PKG_FIXUP:=autoreconf
 PKG_BUILD_PARALLEL:=1
-PKG_LICENSE:=GPL-2.0+
 
 include $(INCLUDE_DIR)/package.mk
 
-
 define Package/opennds
-	SUBMENU:=Captive Portals
-	SECTION:=net
-	CATEGORY:=Network
-	DEPENDS:=+libpthread +iptables-mod-ipopt +libmicrohttpd-no-ssl
-	TITLE:=Open public network gateway daemon
-	URL:=https://github.com/opennds/opennds
-	CONFLICTS:=nodogsplash nodogsplash2
+  SUBMENU:=Captive Portals
+  SECTION:=net
+  CATEGORY:=Network
+  DEPENDS:=+libpthread +iptables-mod-ipopt +libmicrohttpd-no-ssl
+  TITLE:=Open public network gateway daemon
+  URL:=https://github.com/opennds/opennds
+  CONFLICTS:=nodogsplash nodogsplash2
 endef
 
 define Package/opennds/description
-	openNDS is a Captive Portal that offers a simple way to
-	provide restricted access to the Internet by showing a splash
-	page to the user before Internet access is granted.
-	It also incorporates an API that allows the creation of
-	sophisticated authentication applications.
+  openNDS is a Captive Portal solution that offers an instant way to provide restricted access to the Internet.
+  With little or no configuration, a dynamically generated and adaptive splash page sequence is automatically served.
+  Both client driven Captive Portal Detection (CPD) and gateway driven Captive Portal Identification (CPI - RFC 8910 and RFC 8908) are supported.
+  Internet access is granted by either a click to continue button, or after credential verification as a result of filling in a login form.
+  The package incorporates the FAS API allowing many flexible customisation options.
+  The creation of sophisticated third party authentication applications is fully supported.
+  Internet hosted https portals can be implemented with no security errors, to inspire maximum user confidence.
+  This release requires iptables(legacy)
 endef
 
 define Package/opennds/install
-
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/opennds $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ndsctl $(1)/usr/bin/
-
 	$(INSTALL_DIR) $(1)/etc/opennds/htdocs/images
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_DIR) $(1)/usr/lib/opennds
-	$(CP) $(PKG_BUILD_DIR)/resources/splash.html $(1)/etc/opennds/htdocs/
 	$(CP) $(PKG_BUILD_DIR)/resources/splash.css $(1)/etc/opennds/htdocs/
-	$(CP) $(PKG_BUILD_DIR)/resources/status.html $(1)/etc/opennds/htdocs/
 	$(CP) $(PKG_BUILD_DIR)/resources/splash.jpg $(1)/etc/opennds/htdocs/images/
-	$(CP) $(PKG_BUILD_DIR)/openwrt/opennds/files/etc/config/opennds $(1)/etc/config/
-	$(CP) $(PKG_BUILD_DIR)/openwrt/opennds/files/etc/init.d/opennds $(1)/etc/init.d/
-	$(CP) $(PKG_BUILD_DIR)/openwrt/opennds/files/etc/uci-defaults/40_opennds $(1)/etc/uci-defaults/
-	$(CP) $(PKG_BUILD_DIR)/openwrt/opennds/files/usr/lib/opennds/restart.sh $(1)/usr/lib/opennds/
+	$(CP) $(PKG_BUILD_DIR)/linux_openwrt/opennds/files/etc/config/opennds $(1)/etc/config/
+	$(CP) $(PKG_BUILD_DIR)/linux_openwrt/opennds/files/etc/config/opennds $(1)/etc/opennds/config.uci
+	$(CP) $(PKG_BUILD_DIR)/linux_openwrt/opennds/files/etc/init.d/opennds $(1)/etc/init.d/
+	$(CP) $(PKG_BUILD_DIR)/linux_openwrt/opennds/files/etc/uci-defaults/40_opennds $(1)/etc/uci-defaults/
+	$(CP) $(PKG_BUILD_DIR)/linux_openwrt/opennds/files/usr/lib/opennds/restart.sh $(1)/usr/lib/opennds/
 	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/binauth/binauth_log.sh $(1)/usr/lib/opennds/
-	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/binauth/binauth_sitewide.sh $(1)/usr/lib/opennds/
-	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/binauth/userlist.dat $(1)/etc/opennds/
-	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/binauth/splash_sitewide.html $(1)/etc/opennds/htdocs/
-	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/PreAuth/login.sh $(1)/usr/lib/opennds/
-	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/PreAuth/login-remote-image.sh $(1)/usr/lib/opennds/
+	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/libs/libopennds.sh $(1)/usr/lib/opennds/
+	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/PreAuth/theme_click-to-continue-basic.sh $(1)/usr/lib/opennds/
+	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/PreAuth/theme_click-to-continue-custom-placeholders.sh $(1)/usr/lib/opennds/
+	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/PreAuth/theme_user-email-login-basic.sh $(1)/usr/lib/opennds/
+	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/PreAuth/theme_user-email-login-custom-placeholders.sh $(1)/usr/lib/opennds/
 	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/libs/get_client_interface.sh $(1)/usr/lib/opennds/
-	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/libs/get_client_token.sh $(1)/usr/lib/opennds/
+	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/libs/client_params.sh $(1)/usr/lib/opennds/
 	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/libs/unescape.sh $(1)/usr/lib/opennds/
 	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/libs/authmon.sh $(1)/usr/lib/opennds/
+	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/libs/dnsconfig.sh $(1)/usr/lib/opennds/
 	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/libs/post-request.php $(1)/usr/lib/opennds/
 	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/fas-aes/fas-aes.php $(1)/etc/opennds/
 	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/fas-hid/fas-hid.php $(1)/etc/opennds/
